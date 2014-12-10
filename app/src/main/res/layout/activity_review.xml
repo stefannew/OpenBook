@@ -70,10 +70,24 @@
 
     </LinearLayout>
 
-    <ListView android:id="@+id/critic_reviews"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="5" />
+    <LinearLayout android:id="@+id/error_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <TextView android:id="@+id/error_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal|top"
+            android:orientation="vertical"
+            android:textAlignment="center"
+            android:textColor="#000000" />
+
+        </LinearLayout>
+
+        <ListView android:id="@+id/critic_reviews"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5" />
 
     <LinearLayout
         android:orientation="vertical"

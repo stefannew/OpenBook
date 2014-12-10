@@ -55,9 +55,15 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Function to handle initializing barcode scanning intent.
+     * Called from XML on scan button click.
+     *
+     * @param v
+     */
     public void scanButtonClick(View v) {
         Intent captureIntent = new Intent(this, CaptureActivity.class);
-        CaptureActivityIntents.setPromptMessage(captureIntent, "Barcode scanning...");
+        CaptureActivityIntents.setPromptMessage(captureIntent, "Scanning for ISBN...");
         startActivityForResult(captureIntent, 1);
     }
 
@@ -79,6 +85,12 @@ public class MainActivity extends Activity {
         isbn_field.setText(isbn);
     }
 
+    /**
+     * Function to open review intent. Passes ISBN to intent.
+     * Called from XML on review button click.
+     *
+     * @param   v
+     */
     public void getReviews(View v) {
         Intent reviewIntent = new Intent(this, ReviewActivity.class);
         String isbnMessage = isbn_field.getText().toString();
