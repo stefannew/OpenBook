@@ -42,7 +42,6 @@ public class ReviewActivity extends Activity {
     private TextView book_title;
     private TextView book_author;
     private TextView book_genre;
-    private TextView book_date;
     private TextView book_rating;
     private TextView idreambooks_link;
     private ArrayList<Review> review_array_list = new ArrayList<Review>();
@@ -65,7 +64,6 @@ public class ReviewActivity extends Activity {
         book_title              = (TextView) findViewById(R.id.book_title);
         book_author             = (TextView) findViewById(R.id.book_author);
         book_genre              = (TextView) findViewById(R.id.book_genre);
-        book_date               = (TextView) findViewById(R.id.book_date);
         book_rating             = (TextView) findViewById(R.id.book_rating);
         idreambooks_link         = (TextView) findViewById(R.id.idreambooks_link);
 
@@ -147,10 +145,6 @@ public class ReviewActivity extends Activity {
 
                     if (book_object.has("genre")) {
                         book_genre.setText(book_object.getString("genre"));
-                    }
-
-                    if (book_object.has("release_date")) {
-                        book_date.setText(book_object.getString("release_date"));
                     }
 
                     if (book_object.has("rating")) {

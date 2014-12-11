@@ -16,7 +16,8 @@
 
         <activity
             android:name="com.stefannew.bookreview.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,6 +31,7 @@
         <activity
             android:name="com.stefannew.bookreview.ReviewActivity"
             android:label="@string/title_activity_review"
+            android:screenOrientation="portrait"
             android:parentActivityName="com.stefannew.bookreview.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
