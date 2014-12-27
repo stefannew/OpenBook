@@ -1,16 +1,18 @@
-package com.stefannew.bookreview;
+package com.stefannew.openbook;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -38,43 +40,61 @@ import java.net.URL;
 import java.util.ArrayList;
 
 
-public class ReviewActivity extends Activity {
+public class ReviewActivity extends ActionBarActivity {
     private TextView book_title;
     private TextView book_author;
     private TextView book_genre;
     private TextView book_rating;
     private TextView idreambooks_link;
-    private ArrayList<Review> review_array_list = new ArrayList<Review>();
+    private TextView error_text_view;
+
+    private ArrayList<Review> review_array_list = new ArrayList<>();
     private ReviewAdapter review_adapter;
+
     private LinearLayout parent_layout;
     private LinearLayout error_view_container;
-    private TextView error_text_view;
+
+    private LinearLayout info_linear;
+    private LinearLayout loading_layout;
+
+    private ListView critic_reviews;
+    private String apiKey;
+    private String ISBN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review);
+        getSupportActionBar().setElevation(0);
+
+        ImageView loading_image           = (ImageView) findViewById(R.id.loading_image);
+        loading_image.setBackgroundResource(R.drawable.preloader);
+        AnimationDrawable frameAnimation = (AnimationDrawable) loading_image.getBackground();
+        frameAnimation.start();
 
         AdView adView           = (AdView) findViewById(R.id.adView);
         AdRequest adRequest     = new AdRequest.Builder().build();
 
         Intent intent           = getIntent();
-        String ISBN             = intent.getStringExtra(MainActivity.ISBN);
+        ISBN                    = intent.getStringExtra(MainActivity.ISBN);
 
         book_title              = (TextView) findViewById(R.id.book_title);
         book_author             = (TextView) findViewById(R.id.book_author);
         book_genre              = (TextView) findViewById(R.id.book_genre);
         book_rating             = (TextView) findViewById(R.id.book_rating);
-        idreambooks_link         = (TextView) findViewById(R.id.idreambooks_link);
+        idreambooks_link        = (TextView) findViewById(R.id.idreambooks_link);
 
-        ListView critic_reviews = (ListView) findViewById(R.id.critic_reviews);
+        loading_layout          = (LinearLayout) findViewById(R.id.loading_layout);
+        info_linear             = (LinearLayout) findViewById(R.id.info_linear);
 
-        parent_layout = (LinearLayout) critic_reviews.getParent();
-        error_view_container = (LinearLayout) findViewById(R.id.error_view_container);
+        critic_reviews          = (ListView) findViewById(R.id.critic_reviews);
 
-        error_text_view = (TextView) findViewById(R.id.error_text_view);
+        parent_layout           = (LinearLayout) critic_reviews.getParent();
+        error_view_container    = (LinearLayout) findViewById(R.id.error_view_container);
 
-        review_adapter = new ReviewAdapter(this, R.layout.itemlistrow, review_array_list);
+        error_text_view         = (TextView) findViewById(R.id.error_text_view);
+
+        review_adapter          = new ReviewAdapter(this, R.layout.itemlistrow, review_array_list);
 
         critic_reviews.setAdapter(review_adapter);
         critic_reviews.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -89,7 +109,12 @@ public class ReviewActivity extends Activity {
         });
 
         adView.loadAd(adRequest);
-        new ApiRequest(ISBN);
+
+        try {
+            new ApiKeyRequest().execute(new URL("http://stefannew.com/things/openbook/returnApiKey.php?key=a1s2d3f4g5"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -100,9 +125,51 @@ public class ReviewActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        return super.onOptionsItemSelected(item);
+    }
 
-        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+    /**
+     * Non-blocking ASyncTask with http request to iDreamBooks for review content
+     */
+    private class ApiKeyRequest extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected String doInBackground(URL... params) {
+            URL url         = params[0];
+            HttpURLConnection urlConnection;
+            InputStream in;
+            BufferedReader reader;
+            String line;
+
+            StringBuilder out = null;
+
+            try {
+                urlConnection       = (HttpURLConnection) url.openConnection();
+                in                  = new BufferedInputStream(urlConnection.getInputStream());
+                reader              = new BufferedReader(new InputStreamReader(in));
+                out                 = new StringBuilder();
+
+                while ((line = reader.readLine()) != null) {
+                    out.append(line);
+                }
+
+            } catch (IOException ie) {
+                ie.printStackTrace();
+            }
+
+            return out.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            apiKey = result;
+
+            try {
+                new ApiRequest(ISBN);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -110,12 +177,11 @@ public class ReviewActivity extends Activity {
      */
     public class ApiRequest {
         private final String ISBN;
-        private final String key = "7a22537db832c4fcc14bb1d41cf6444fe48fea73";
 
         public ApiRequest(String ISBN) {
             this.ISBN = ISBN;
 
-            new HttpRequest().execute(getUrl(key));
+            new HttpRequest().execute(getUrl(apiKey));
         }
 
         /**
@@ -130,37 +196,67 @@ public class ReviewActivity extends Activity {
             JSONArray review_array;
             int review_count = 0;
 
+            if (result.equals("invalid key")) {
+                parent_layout.removeView(findViewById(R.id.critic_reviews));
+
+                error_view_container.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 4f));
+
+                error_text_view.setText(Html.fromHtml("<p>Oops! Invalid API key.</p>"));
+                error_text_view.setMovementMethod(LinkMovementMethod.getInstance());
+            }
+
+            String title        = "";
+            String author       = "";
+            String genre        = "";
+            String rating       = "";
+            String detail_link  = "";
+
             try {
                 json = new JSONObject(result);
                 book_object = json.getJSONObject("book");
 
                 if (book_object != null) {
                     if (book_object.has("title")) {
-                        book_title.setText(book_object.getString("title"));
+                        title = book_object.getString("title");
                     }
 
                     if (book_object.has("author")) {
-                        book_author.setText(book_object.getString("author"));
+                        author = book_object.getString("author");
                     }
 
                     if (book_object.has("genre")) {
-                        book_genre.setText(book_object.getString("genre"));
+                        genre = book_object.getString("genre");
                     }
 
                     if (book_object.has("rating")) {
-                        book_rating.setText(book_object.getString("rating"));
+                        rating = book_object.getString("rating") + '%';
                     }
 
                     if (book_object.has("detail_link") && book_object.has("title")) {
-                        idreambooks_link.setText(Html.fromHtml("<a href='" +
-                                book_object.getString("detail_link") + "'>'" +
-                                book_object.getString("title") +
-                                "' Reviews from iDreamBooks.com</a>"));
-                        idreambooks_link.setMovementMethod(LinkMovementMethod.getInstance());
+                        detail_link = book_object.getString("detail_link");
                     }
 
                     if (book_object.has("review_count")) {
                         review_count = book_object.getInt("review_count");
+                    }
+
+                    book_title.setText(title);
+                    book_author.setText(author);
+                    book_genre.setText(genre);
+                    book_rating.setText(rating);
+
+                    if (title.length() > 0) {
+                        getSupportActionBar().setTitle(title);
+                    } else {
+                        getSupportActionBar().setTitle(ISBN.replaceAll("\\+", " "));
+                    }
+
+                    if (book_object.has("detail_link")) {
+                        idreambooks_link.setText(Html.fromHtml("<a href='" +
+                                detail_link + "'>'" + title +
+                                "' Reviews from iDreamBooks.com</a>"));
+
+                        idreambooks_link.setMovementMethod(LinkMovementMethod.getInstance());
                     }
 
                     if (review_count > 0) {
@@ -169,17 +265,12 @@ public class ReviewActivity extends Activity {
                         for (int i = 0; i < review_array.length(); i++) {
                             JSONObject currentObj = review_array.getJSONObject(i);
 
-                            String source           = null;
-                            String source_logo      = null;
-                            String snippet          = null;
-                            String review_link      = null;
+                            String source = null;
+                            String snippet = null;
+                            String review_link = null;
 
                             if (currentObj.has("source") && !currentObj.isNull("source")) {
                                 source = currentObj.getString("source");
-                            }
-
-                            if (currentObj.has("source_logo") && !currentObj.isNull("source_logo")) {
-                                source_logo = currentObj.getString("source_logo");
                             }
 
                             if (currentObj.has("snippet") && !currentObj.isNull("snippet")) {
@@ -190,55 +281,32 @@ public class ReviewActivity extends Activity {
                                 review_link = currentObj.getString("review_link");
                             }
 
-                            review_array_list.add(new Review(source, source_logo, snippet, review_link));
+                            review_array_list.add(new Review(source, snippet, review_link));
                         }
+                    } else if (detail_link.length() > 0) {
+                        new Scrape().execute(detail_link, title, author, ISBN);
                     } else {
-                        /*
-                        String title = null;
-                        String author = null;
-
-                        if (book_object.has("title")) {
-                            title = book_object.getString("title");
-                        }
-                        if (book_object.has("author")) {
-                            author = book_object.getString("author");
-                        }
-
                         parent_layout.removeView(findViewById(R.id.critic_reviews));
+
                         error_view_container.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 4f));
 
-                        error_text_view.setText(Html.fromHtml("<p>No Reviews for " +
-                                title + " by " +
-                                author + " found." + '\n' +
+                        error_text_view.setText(Html.fromHtml("<p>No information for " +
+                                this.ISBN.replaceAll("\\+", " ") + " found in database." + "<br>" +
                                 "Would you like to " + "<a href=" +
                                 "https://www.google.com/?gws_rd=ssl#q=book+reviews+for+" +
                                 this.ISBN + ">search online?</a></p>"));
                         error_text_view.setMovementMethod(LinkMovementMethod.getInstance());
-                        */
-                        new Scrape().execute(book_object.getString("detail_link"));
                     }
-                } else {
-                    parent_layout.removeView(findViewById(R.id.critic_reviews));
+                    review_adapter.notifyDataSetChanged();
 
-                    error_view_container.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 4f));
-
-                    error_text_view.setText(Html.fromHtml("<p>No information for ISBN " +
-                            this.ISBN + " found in database." +
-                            "Would you like to " + "<a href=" +
-                            "https://www.google.com/?gws_rd=ssl#q=book+reviews+for+" +
-                            this.ISBN + ">search online?</a></p>"));
-                    error_text_view.setMovementMethod(LinkMovementMethod.getInstance());
                 }
-
-                review_adapter.notifyDataSetChanged();
-
             } catch (JSONException je) {
-                Toast toast = Toast.makeText(getApplicationContext(), "JSON Exception", Toast.LENGTH_SHORT);
-                toast.show();
                 je.printStackTrace();
             }
 
-            System.out.println(result);
+            loading_layout.setVisibility(View.GONE);
+            info_linear.setVisibility(View.VISIBLE);
+            critic_reviews.setVisibility(View.VISIBLE);
         }
 
         /**
@@ -262,8 +330,6 @@ public class ReviewActivity extends Activity {
 
         /**
          * Non-blocking ASyncTask with http request to iDreamBooks for review content
-         *
-         * @return          a JSON-formatted object with matching book and reviews (if any)
          */
         private class HttpRequest extends AsyncTask<URL, Void, String> {
 
@@ -302,9 +368,16 @@ public class ReviewActivity extends Activity {
 
         private class Scrape extends AsyncTask<String, Void, JSONObject> {
 
+            private String title;
+            private String author;
+            private String ISBN;
+
             @Override
             protected JSONObject doInBackground(String... params) {
-                String url = params[0];
+                String url      = params[0];
+                title           = params[1];
+                author          = params[2];
+                ISBN            = params[3];
                 JSONObject json = new JSONObject();
                 JSONArray arr = new JSONArray();
                 Document doc = null;
@@ -319,7 +392,7 @@ public class ReviewActivity extends Activity {
                 Elements h1 = reviews.select("h1");
                 Elements p = reviews.select("p");
 
-                ArrayList<Element> a = new ArrayList<Element>();
+                ArrayList<Element> a = new ArrayList<>();
 
                 for (int i = 0; i < reviews.size(); i++) {
                     for (int x = 0; x < reviews.get(i).select("a").size(); x++) {
@@ -364,30 +437,43 @@ public class ReviewActivity extends Activity {
                     try {
                         review_array = json.getJSONArray("critic_reviews");
 
-                        for (int i = 0; i < review_array.length(); i++) {
-                            JSONObject currentObj = review_array.getJSONObject(i);
+                        if (review_array.length() > 0) {
+                            for (int i = 0; i < review_array.length(); i++) {
+                                JSONObject currentObj = review_array.getJSONObject(i);
 
-                            String source = null;
-                            String snippet = null;
-                            String review_link = null;
+                                String source = null;
+                                String snippet = null;
+                                String review_link = null;
 
-                            if (currentObj.has("source") && !currentObj.isNull("source")) {
-                                source = currentObj.getString("source");
+                                if (currentObj.has("source") && !currentObj.isNull("source")) {
+                                    source = currentObj.getString("source");
+                                }
+
+                                if (currentObj.has("snippet") && !currentObj.isNull("snippet")) {
+                                    snippet = currentObj.getString("snippet");
+                                }
+
+                                if (currentObj.has("review_link") && !currentObj.isNull("review_link")) {
+                                    review_link = currentObj.getString("review_link");
+                                }
+
+                                review_array_list.add(new Review(source, snippet, review_link));
                             }
 
-                            if (currentObj.has("snippet") && !currentObj.isNull("snippet")) {
-                                snippet = currentObj.getString("snippet");
-                            }
+                            review_adapter.notifyDataSetChanged();
+                        } else {
+                            parent_layout.removeView(findViewById(R.id.critic_reviews));
+                            error_view_container.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 4f));
 
-                            if (currentObj.has("review_link") && !currentObj.isNull("review_link")) {
-                                review_link = currentObj.getString("review_link");
-                            }
-
-                            review_array_list.add(new Review(source, null, snippet, review_link));
+                            error_text_view.setText(Html.fromHtml("<p>No Reviews for \"" +
+                                    title + "\" by " +
+                                    author + " found." + "<br>" +
+                                    "Would you like to " + "<a href=" +
+                                    "https://www.google.com/?gws_rd=ssl#q=book+reviews+for+" +
+                                    ISBN + ">search online?</a></p>"));
+                            error_text_view.setMovementMethod(LinkMovementMethod.getInstance());
                         }
 
-                        review_adapter.notifyDataSetChanged();
-                        System.out.println(review_array);
 
                     } catch (JSONException je) {
                         je.printStackTrace();

@@ -4,9 +4,27 @@
     tools:context=".ReviewActivity"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#fff">
 
     <LinearLayout
+        android:id="@+id/loading_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="6">
+
+        <ImageView
+            android:id="@+id/loading_image"
+            android:contentDescription="@string/loading_image_desc"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="center_horizontal|center_vertical" />
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/info_linear"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -14,9 +32,10 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingEnd="@dimen/activity_horizontal_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin"
+
         android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingStart="@dimen/activity_horizontal_margin">
+        android:paddingStart="@dimen/activity_horizontal_margin"
+        android:visibility="gone">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -34,17 +53,20 @@
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:textColor="#212121" />
 
                         <TextView android:id="@+id/book_author"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:textColor="#212121" />
 
                         <TextView android:id="@+id/book_genre"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:textColor="#212121" />
 
                 </LinearLayout>
 
@@ -85,7 +107,8 @@
     <ListView android:id="@+id/critic_reviews"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="5" />
+            android:layout_weight="5"
+            android:visibility="gone" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -112,7 +135,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+            ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+            android:layout_marginBottom="12dp" />
 
     </RelativeLayout>
 

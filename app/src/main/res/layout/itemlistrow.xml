@@ -12,7 +12,8 @@
     <TextView android:id="@+id/review_source"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textColor="#212121" />
 
     <TextView android:id="@+id/review_snippet"
         android:layout_width="fill_parent"

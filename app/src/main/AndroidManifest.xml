@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.stefannew.bookreview" >
+    package="com.stefannew.openbook" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/openbook_logo"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
 
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.stefannew.bookreview.MainActivity"
+            android:name="com.stefannew.openbook.MainActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,13 +30,13 @@
             android:screenOrientation="landscape"
             android:theme="@style/Theme.ZXingCaptureActivity" />
         <activity
-            android:name="com.stefannew.bookreview.ReviewActivity"
+            android:name="com.stefannew.openbook.ReviewActivity"
             android:label="@string/title_activity_review"
-            android:screenOrientation="portrait"
-            android:parentActivityName="com.stefannew.bookreview.MainActivity" >
+            android:screenOrientation="portrait">
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.stefannew.bookreview.MainActivity" />
+                android:value="com.stefannew.openbook.MainActivity" />
         </activity>
 
         <activity android:name="com.google.android.gms.ads.AdActivity"

@@ -1,4 +1,4 @@
-package com.stefannew.bookreview;
+package com.stefannew.openbook;
 
 import android.app.Activity;
 import android.content.Context;
