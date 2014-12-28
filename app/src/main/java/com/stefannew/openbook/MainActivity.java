@@ -1,12 +1,18 @@
 package com.stefannew.openbook;
 
+import android.app.ActionBar;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -26,7 +32,10 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         getSupportActionBar().setElevation(0);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(R.layout.action_bar);
 
         AdView adView       = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -62,6 +71,14 @@ public class MainActivity extends ActionBarActivity {
        return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        bookField.setText("");
+        isbnField.setText("");
+    }
+
     /**
      * Function to handle initializing barcode scanning intent.
      * Called from XML on scan button click.
@@ -88,6 +105,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         isbnField.setText(isbn);
+        bookField.setText("");
     }
 
     /**
@@ -108,13 +126,32 @@ public class MainActivity extends ActionBarActivity {
             isbnMessage = titleText.replaceAll(" ", "+");
         }
 
-        if (isbnMessage.length() > 0) {
-            reviewIntent.putExtra(ISBN, isbnMessage);
-            startActivity(reviewIntent);
+        if (isConnected()) {
+            if (isbnMessage.length() > 0) {
+                reviewIntent.putExtra(ISBN, isbnMessage);
+                startActivity(reviewIntent);
+            } else {
+                Toast toast = Toast.makeText(getApplicationContext(), "Please scan or enter an ISBN, or book title", Toast.LENGTH_LONG);
+                TextView view = (TextView) toast.getView().findViewById(android.R.id.message);
+                if( view != null) view.setGravity(Gravity.CENTER);
+                toast.show();
+            }
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(), "Please scan or enter an ISBN, or book title",
-                    Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getApplicationContext(), "No internet connection detected. Please check connection settings.", Toast.LENGTH_LONG);
+            TextView view = (TextView) toast.getView().findViewById(android.R.id.message);
+            if( view != null) view.setGravity(Gravity.CENTER);
             toast.show();
         }
+
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
     }
 }

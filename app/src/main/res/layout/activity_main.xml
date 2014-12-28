@@ -26,6 +26,7 @@
         android:layout_height="wrap_content"
         android:text="@string/scan_button"
         android:onClick="scanButtonClick"
+        android:layout_marginBottom="4sp"
         android:layout_below="@id/openbook_logo" />
 
     <EditText android:id="@+id/isbn_field"
@@ -37,13 +38,24 @@
         android:imeOptions="actionDone"
         android:hint="@string/isbn_field_hint"/>
 
+    <TextView android:id="@+id/text_view_or"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_below="@id/isbn_field"
+        android:textSize="18sp"
+        android:layout_marginTop="4sp"
+        android:layout_marginBottom="4sp"
+        android:text="OR" />
+
     <EditText android:id="@+id/title_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:inputType="text"
-        android:layout_below="@id/isbn_field"
+        android:layout_below="@id/text_view_or"
         android:imeOptions="actionDone"
+        android:layout_marginBottom="4sp"
         android:hint="@string/title_field_hint" />
 
     <Button android:id="@+id/review_button"
@@ -59,7 +71,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+        ads:adUnitId="ca-app-pub-5678334000960649/3500404866"
         android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

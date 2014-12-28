@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -201,7 +202,7 @@ public class ReviewActivity extends ActionBarActivity {
 
                 error_view_container.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 4f));
 
-                error_text_view.setText(Html.fromHtml("<p>Oops! Invalid API key.</p>"));
+                error_text_view.setText(Html.fromHtml("<p>Oops! Invalid API key. Please try again later.</p>"));
                 error_text_view.setMovementMethod(LinkMovementMethod.getInstance());
             }
 
@@ -322,6 +323,8 @@ public class ReviewActivity extends ActionBarActivity {
                 url = new URL("http://idreambooks.com/api/books/reviews.json?q=" + this.ISBN + "&key=" + key);
             } catch (MalformedURLException me) {
                 Toast toast = Toast.makeText(getApplicationContext(), "Error: Malformed URL", Toast.LENGTH_SHORT);
+                TextView view = (TextView) toast.getView().findViewById(android.R.id.message);
+                if( view != null) view.setGravity(Gravity.CENTER);
                 toast.show();
             }
 
@@ -466,8 +469,7 @@ public class ReviewActivity extends ActionBarActivity {
                             error_view_container.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 4f));
 
                             error_text_view.setText(Html.fromHtml("<p>No Reviews for \"" +
-                                    title + "\" by " +
-                                    author + " found." + "<br>" +
+                                    title + "\"" + " found." + "<br>" +
                                     "Would you like to " + "<a href=" +
                                     "https://www.google.com/?gws_rd=ssl#q=book+reviews+for+" +
                                     ISBN + ">search online?</a></p>"));

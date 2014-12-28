@@ -54,7 +54,9 @@
                             android:layout_height="wrap_content"
                             android:textSize="12sp"
                             android:textStyle="bold"
-                            android:textColor="#212121" />
+                            android:textColor="#212121"
+                            android:ellipsize="end"
+                            android:singleLine="true" />
 
                         <TextView android:id="@+id/book_author"
                             android:layout_width="fill_parent"
@@ -135,7 +137,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             ads:adSize="BANNER"
-            ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+            ads:adUnitId="ca-app-pub-5678334000960649/4977138064"
             android:layout_marginBottom="12dp" />
 
     </RelativeLayout>

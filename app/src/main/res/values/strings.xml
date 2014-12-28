@@ -10,6 +10,6 @@
     <string name="review_button">Get Reviews</string>
     <string name="loading_image_desc">Loading Image</string>
     <string name="isbn_field_hint">Enter ISBN</string>
-    <string name="title_field_hint">Enter Book Title and Author</string>
+    <string name="title_field_hint">Enter Book Title</string>
 
 </resources>
