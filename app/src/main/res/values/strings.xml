@@ -6,10 +6,9 @@
     <string name="title_activity_review">Fetching Reviews</string>
     <string name="logo_desc">OpenBook logo</string>
     <string name="scan_button">Scan Barcode</string>
-    <string name="manual">Or, enter manually:</string>
     <string name="review_button">Get Reviews</string>
     <string name="loading_image_desc">Loading Image</string>
     <string name="isbn_field_hint">Enter ISBN</string>
-    <string name="title_field_hint">Enter Book Title</string>
+    <string name="title_field_hint">Enter Book Title and Author</string>
 
 </resources>
